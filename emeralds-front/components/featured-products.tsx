@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 
 type Producto = {
   id: string;
-  emeraldName: string;
+  name: string;
+  price: number;
+  imageUrl: string;
 };
 
 const FeaturedProducts = () => {
@@ -33,7 +35,7 @@ const FeaturedProducts = () => {
         const token = loginData.access_token;
 
         // 2. Llamar productos con token
-        const productosRes = await fetch("http://localhost:8080/api/v1/cart?userId=1", {
+        const productosRes = await fetch("http://localhost:8080/api/v1/emeralds", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -59,10 +61,16 @@ const FeaturedProducts = () => {
     <div className="grid grid-cols-3 gap-4">
       {productos.map((p) => (
         <div key={p.id} className="border p-4">
-          <p>{p.emeraldName}</p>
+          <p>{p.name + " " + p.price}</p>
+          <img
+            src={p.imageUrl}
+            alt={p.name}
+            className="w-full h-48 object-cover"
+          />
         </div>
-      ))}
-    </div>
+      ))
+      }
+    </div >
   );
 };
 
