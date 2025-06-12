@@ -4,32 +4,43 @@ import { useParams } from "next/navigation";
 import { getProductBySlug } from "@/app/api/getProductBySlug";
 import { ResponseData } from "@/types/response";
 import { ProductType } from "@/types/product";
+import SkeletonProduct from "./components/skeleton-product";
+import { Car } from "lucide-react";
+import CarouselProduct from "./components/carousel-product";
 
 export default function ProductPage() {
   const params = useParams();
-const productSlug = params.productSlug as string | string[];
-const { result, loading, error }: ResponseData = getProductBySlug(productSlug);
+  const productSlug = params.productSlug as string | string[];
+  const { result, loading, error }: ResponseData = getProductBySlug(productSlug);
 
-  console.log("Product params:", result);
-
+  if (result === null && loading) {
+    return <SkeletonProduct />;
+  }
   return (
-    <main className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Producto X</h1>
-      {loading && <p>Cargando producto...</p>}
-      {error && <p>Error al cargar el producto.</p>}
-      {result && (
-        <div>
-          {result?.map((result:ProductType) => (
-            <div key={result.id}>
-              <h2>{result.name}</h2>
-              <p>{result.description}</p>
-              <p>{result.price}</p>
-              <img src={result.imageUrl} alt={result.name} width={150} />
-            </div>
-          ))}
-        </div>
-      )}
-      {/* Aquí podrías agregar un componente para listar productos por categoría */}
-    </main>
+    <div className="max-w-6xl py-4 mx-auto sm:py-32 sm:px-24">
+      <div className="grid sm:grid-cols-2">
+        <CarouselProduct
+          id={result[0].id}
+          name={result[0].name}
+          description={result[0].description}
+          price={result[0].price}
+          caratWeight={result[0].caratWeight}
+          origin={result[0].origin}
+          certification={result[0].certification}
+          clarity={result[0].clarity}
+          color={result[0].color}
+          imageUrl={result[0].imageUrl}
+          stockQuantity={result[0].stockQuantity}
+          lengthMm={result[0].lengthMm}
+          widthMm={result[0].widthMm}
+          createdAt={result[0].createdAt}
+          updatedAt={result[0].updatedAt}
+        />
+      </div>
+
+      <div className="sm:px-12">
+        <p>Info del producto</p>
+      </div>
+    </div >
   );
 }
