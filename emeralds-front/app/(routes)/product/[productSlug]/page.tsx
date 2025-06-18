@@ -29,7 +29,7 @@ export default function ProductPage() {
           certification={result[0].certification}
           clarity={result[0].clarity}
           color={result[0].color}
-          imageUrl={result[0].imageUrl}
+          imageUrls={result[0].imageUrls}
           stockQuantity={result[0].stockQuantity}
           lengthMm={result[0].lengthMm}
           widthMm={result[0].widthMm}

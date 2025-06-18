@@ -1,4 +1,4 @@
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface CarouselProductProps {
   id: number;
@@ -10,7 +10,7 @@ interface CarouselProductProps {
   certification: string;
   clarity: string;
   color: string;
-  imageUrl: string;
+  imageUrls: string[]
   stockQuantity: number;
   lengthMm: number;
   widthMm: number;
@@ -19,27 +19,30 @@ interface CarouselProductProps {
 }
 
 
-const CarouselProduct =(props:CarouselProductProps) => {
+
+const CarouselProduct = (props: CarouselProductProps) => {
+  console.log("Carousel props:", props);
   return (
     <div className="sm:px-16">
-        <Carousel>
-            <CarouselContent>
-                <CarouselItem key={props.id} className="flex items-center justify-center">
-                    <div className="flex items-center justify-center">
-                        <img
-                            src={props.imageUrl}
-                            alt={props.name}
-                            className="h-[400px] w-[400px] object-cover rounded-lg"
-                        />
-                    </div>
-                </CarouselItem>
-
-
-            </CarouselContent>
-
-        </Carousel>
+      <Carousel>
+        <CarouselContent>
+          {props.imageUrls.map((url, index) => (
+            <CarouselItem key={index} className="flex items-center justify-center">
+              <div className="flex items-center justify-center">
+                <img
+                  src={url}
+                  alt={`${props.name} - ${index + 1}`}
+                  className="h-[400px] w-[400px] object-cover rounded-lg"
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
     </div>
-  )
-}
+  );
+};
 
 export default CarouselProduct;
