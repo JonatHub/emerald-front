@@ -3,10 +3,9 @@
 import { useParams } from "next/navigation";
 import { getProductBySlug } from "@/app/api/getProductBySlug";
 import { ResponseData } from "@/types/response";
-import { ProductType } from "@/types/product";
 import SkeletonProduct from "./components/skeleton-product";
-import { Car } from "lucide-react";
 import CarouselProduct from "./components/carousel-product";
+import InfoProduct from "./components/info-product";
 
 export default function ProductPage() {
   const params = useParams();
@@ -37,9 +36,8 @@ export default function ProductPage() {
           updatedAt={result[0].updatedAt}
         />
       </div>
-
       <div className="sm:px-12">
-        <p>Info del producto</p>
+        <InfoProduct product={result[0]} />
       </div>
     </div >
   );
