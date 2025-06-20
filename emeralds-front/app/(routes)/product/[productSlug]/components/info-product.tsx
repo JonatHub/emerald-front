@@ -1,4 +1,5 @@
 import { ProductType } from "@/types/product";
+import { Heart } from "lucide-react";
 
 export type InfoProductProps = {
   product: ProductType;
@@ -58,6 +59,11 @@ const infoProduct = (props: InfoProductProps) => {
       <div className="mb-2 text-xs text-gray-500">
         <span>Creado: {new Date(product.createdAt).toLocaleDateString()}</span>
         <span className="ml-4">Actualizado: {new Date(product.updatedAt).toLocaleDateString()}</span>
+      </div>
+      <div className="flex items-center gap-5 bg-gray-300 p-4 rounded-lg">
+        <button className="w-full" onClick={() => console.log("Comprar")}>Comprar ahora</button>
+        <Heart width={30} strokeWidth={1} className="transition duration-300 cursor-pointer hover:fill-black o"
+          onClick={() => console.log("Add to loved products")} />
       </div>
     </div>
   )
