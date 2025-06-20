@@ -2,6 +2,7 @@
 
 import { access } from "fs";
 import { useEffect, useState } from "react";
+import { useCart } from "../hooks/use-cart";
 
 type Producto = {
   id: string;

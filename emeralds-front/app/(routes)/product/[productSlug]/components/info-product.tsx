@@ -1,12 +1,15 @@
 import { ProductType } from "@/types/product";
 import { Heart } from "lucide-react";
+import { useCart } from "../../../../../hooks/use-cart";
 
 export type InfoProductProps = {
   product: ProductType;
 }
 
 const infoProduct = (props: InfoProductProps) => {
+  const {addItem, items} = useCart();
   const { product } = props;
+  console.log("Product in infoProduct:", items);
   return (
     <div>
       <div className="justify-between mb-3 sm:flex">
@@ -63,7 +66,7 @@ const infoProduct = (props: InfoProductProps) => {
       <div className="flex items-center gap-5 bg-gray-300 p-4 rounded-lg">
         <button className="w-full" onClick={() => console.log("Comprar")}>Comprar ahora</button>
         <Heart width={30} strokeWidth={1} className="transition duration-300 cursor-pointer hover:fill-black o"
-          onClick={() => console.log("Add to loved products")} />
+          onClick={() => addItem(product)} />
       </div>
     </div>
   )
