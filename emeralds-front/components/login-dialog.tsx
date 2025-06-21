@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { toast } from 'sonner';
+import ForgotPasswordDialog from './forgot-password-dialog';
 
 interface LoginDialogProps {
   open: boolean;
@@ -15,6 +16,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,45 +56,63 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
   };
 
   const handleForgotPassword = () => {
-    toast.info('Funcionalidad de recuperación de contraseña próximamente disponible.');
-    // Aquí podrías abrir otro modal o navegar a una página de recuperación
+    setShowForgotPassword(true);
+  };
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+  };
+
+  const handleClose = () => {
+    setUsername('');
+    setPassword('');
+    setShowForgotPassword(false);
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Iniciar Sesión</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            placeholder="Usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Iniciando...' : 'Iniciar Sesión'}
-          </Button>
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="text-sm text-emerald-600 hover:text-emerald-800 underline"
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open && !showForgotPassword} onOpenChange={handleClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Iniciar Sesión</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              placeholder="Usuario"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? 'Iniciando...' : 'Iniciar Sesión'}
+            </Button>
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-emerald-600 hover:text-emerald-800 underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      <ForgotPasswordDialog
+        open={showForgotPassword}
+        onOpenChange={setShowForgotPassword}
+        onBackToLogin={handleBackToLogin}
+      />
+    </>
   );
 };
 
