@@ -16,29 +16,8 @@ export default function ProductPage() {
     return <SkeletonProduct />;
   }
   return (
-    <div className="max-w-6xl py-4 mx-auto sm:py-32 sm:px-24">
-      <div className="grid sm:grid-cols-2">
-        <CarouselProduct
-          id={result[0].id}
-          name={result[0].name}
-          description={result[0].description}
-          price={result[0].price}
-          caratWeight={result[0].caratWeight}
-          origin={result[0].origin}
-          certification={result[0].certification}
-          clarity={result[0].clarity}
-          color={result[0].color}
-          imageUrls={result[0].imageUrls}
-          stockQuantity={result[0].stockQuantity}
-          lengthMm={result[0].lengthMm}
-          widthMm={result[0].widthMm}
-          createdAt={result[0].createdAt}
-          updatedAt={result[0].updatedAt}
-        />
-      </div>
-      <div className="sm:px-12">
-        <InfoProduct product={result[0]} />
-      </div>
-    </div >
+    
+    <InfoProduct product={result[0]} />
+
   );
 }
