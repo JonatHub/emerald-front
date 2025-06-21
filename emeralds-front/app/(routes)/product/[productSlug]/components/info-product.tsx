@@ -64,7 +64,7 @@ const infoProduct = (props: InfoProductProps) => {
         <span className="ml-4">Actualizado: {new Date(product.updatedAt).toLocaleDateString()}</span>
       </div>
       <div className="flex items-center gap-5 bg-gray-300 p-4 rounded-lg">
-        <button className="w-full" onClick={() => console.log("Comprar")}>Comprar ahora</button>
+        <button className="w-full" onClick={() => addItem(product)}>Comprar ahora</button>
         <Heart width={30} strokeWidth={1} className="transition duration-300 cursor-pointer hover:fill-black o"
           onClick={() => addItem(product)} />
       </div>
