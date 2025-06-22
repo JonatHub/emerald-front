@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { toast } from 'sonner';
 import ForgotPasswordDialog from './forgot-password-dialog';
+import Link from 'next/link';
 
 interface LoginDialogProps {
   open: boolean;
@@ -94,14 +95,24 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onOpenChange }) => {
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Iniciando...' : 'Iniciar Sesión'}
             </Button>
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-sm text-emerald-600 hover:text-emerald-800 underline"
+                className="text-sm text-emerald-600 hover:text-emerald-800 underline block"
               >
                 ¿Olvidaste tu contraseña?
               </button>
+              <div className="text-sm text-gray-600">
+                ¿No tienes una cuenta?{' '}
+                <Link 
+                  href="/register" 
+                  className="text-emerald-600 hover:text-emerald-800 underline font-medium"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Regístrate aquí
+                </Link>
+              </div>
             </div>
           </form>
         </DialogContent>
