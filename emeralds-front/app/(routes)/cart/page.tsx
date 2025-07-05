@@ -2,9 +2,14 @@
 
 import { useCart } from "@/hooks/use-cart";
 import { useState } from "react";
+import PayPalButton from "@/components/paypal-button";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Page() {
-    const { items, removeAll, removeItem, addItem } = useCart();
+    const { items, removeAll, removeItem } = useCart();
+    const router = useRouter();
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
 
     // Manejar cantidades por producto
     const [quantities, setQuantities] = useState<{ [id: number]: number }>(
@@ -21,15 +26,61 @@ export default function Page() {
     // Calcular el total del carrito considerando cantidades
     const total = items.reduce((acc, item) => acc + item.price * (quantities[item.id] || 1), 0);
 
+    // Crear productos con cantidades para PayPal
+    const productsWithQuantities = items.map(item => ({
+        ...item,
+        quantity: quantities[item.id] || 1,
+        totalPrice: item.price * (quantities[item.id] || 1)
+    }));
+
+    const handlePaymentSuccess = (details: any) => {
+        console.log("Payment completed:", details);
+        removeAll();
+        setIsCheckingOut(false);
+        toast.success("¡Compra completada! Recibirás un email de confirmación.");
+        // Redirigir a la página de confirmación con el ID de la orden
+        const orderId = details.purchase_units?.[0]?.custom_id;
+        if (orderId) {
+            router.push(`/order-confirmation?orderId=${orderId}`);
+        } else {
+            router.push('/');
+        }
+    };
+
+    const handlePaymentError = (error: any) => {
+        console.error("Payment error:", error);
+        setIsCheckingOut(false);
+        toast.error("Error en el proceso de pago. Inténtalo de nuevo.");
+    };
+
+    const handlePaymentCancel = () => {
+        setIsCheckingOut(false);
+        toast.info("Pago cancelado");
+    };
+
+    const handleStartCheckout = () => {
+        if (items.length === 0) {
+            toast.error("El carrito está vacío");
+            return;
+        }
+        setIsCheckingOut(true);
+    };
+
     return (
         <div className="max-w-6xl px-4 py-10 mx-auto sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold mb-8 text-center">Shopping Cart</h1>
+            <h1 className="text-3xl font-bold mb-8 text-center">Carrito de Compras</h1>
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Cart Items */}
                 <div className="flex-1">
                     {items.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-64 border rounded bg-gray-50">
-                            <p className="text-gray-500 text-lg">Your cart is empty.</p>
+                            <p className="text-gray-500 text-lg">Tu carrito está vacío.</p>
+                            <button
+                                onClick={() => router.push('/')}
+                                className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+                            >
+                                Continuar comprando
+                            </button>
                         </div>
                     ) : (
                         <ul className="space-y-6">
@@ -117,12 +168,31 @@ export default function Page() {
                         >
                             Vaciar carrito
                         </button>
-                        <button
-                            className="w-full mt-3 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
-                            disabled={items.length === 0}
-                        >
-                            Proceder al pago
-                        </button>
+                        
+                        {!isCheckingOut ? (
+                            <button
+                                onClick={handleStartCheckout}
+                                className="w-full mt-3 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+                                disabled={items.length === 0}
+                            >
+                                Proceder al pago
+                            </button>
+                        ) : (
+                            <div className="mt-4">
+                                <PayPalButton
+                                    products={productsWithQuantities}
+                                    onSuccess={handlePaymentSuccess}
+                                    onError={handlePaymentError}
+                                    onCancel={handlePaymentCancel}
+                                />
+                                <button
+                                    onClick={() => setIsCheckingOut(false)}
+                                    className="w-full mt-3 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
