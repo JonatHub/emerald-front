@@ -15,6 +15,7 @@ import {
   Hash,
   RefreshCw
 } from "lucide-react";
+import OrdersPagination from "@/components/orders-pagination";
 
 const statusConfig = {
   pending: {
@@ -56,7 +57,17 @@ const statusConfig = {
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { orders, loading, error, fetchOrders, clearError } = useOrderStore();
+  const { 
+    orders, 
+    loading, 
+    error, 
+    fetchOrders, 
+    clearError,
+    currentPage,
+    totalPages,
+    totalElements,
+    pageSize
+  } = useOrderStore();
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -122,6 +133,10 @@ export default function OrdersPage() {
 
   const handleRefresh = () => {
     fetchOrders();
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchOrders(page);
   };
 
   if (error) {
@@ -388,6 +403,16 @@ export default function OrdersPage() {
           })
         )}
       </div>
+
+      {/* Pagination */}
+      <OrdersPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        size={pageSize}
+        onPageChange={handlePageChange}
+        loading={loading}
+      />
     </div>
   );
 } 

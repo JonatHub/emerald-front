@@ -16,7 +16,7 @@ import {
 const components: { title: string; href: string; description: string }[] = [
   {
     title: "Catálogo de Esmeraldas",
-    href: "/esmeraldas/catalogo",
+    href: "/catalog",
     description:
       "Explora nuestra colección de esmeraldas colombianas, con variedad de cortes, tamaños y calidades.",
   },

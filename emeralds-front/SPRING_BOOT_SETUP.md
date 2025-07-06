@@ -4,7 +4,7 @@
 
 ### **1. Crear Orden**
 ```bash
-POST /orders
+POST /api/v1/orders
 ```
 
 **Headers:**
@@ -62,8 +62,10 @@ Authorization: Bearer {user_token}
 
 ### **2. Obtener Órdenes del Usuario (Paginado)**
 ```bash
-GET /orders?page=0&size=10&status=all
+GET /api/v1/orders?page=0&size=10&status=all
 ```
+
+**Nota**: La paginación en Spring Boot empieza en `page=0`, no en `page=1`. El parámetro `size` controla cuántos elementos por página.
 
 **Headers:**
 ```
@@ -133,7 +135,7 @@ Authorization: Bearer {user_token}
 
 ### **3. Obtener Detalle de Orden**
 ```bash
-GET /orders/{orderId}
+GET /api/v1/orders/{orderId}
 ```
 
 **Headers:**
@@ -190,7 +192,7 @@ Authorization: Bearer {user_token}
 
 ### **4. Actualizar Estado de Orden**
 ```bash
-PATCH /orders/{orderId}/status
+PATCH /api/v1/orders/{orderId}/status
 ```
 
 **Headers:**
@@ -351,7 +353,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/orders/**").authenticated()
+                .requestMatchers("/api/v1/orders/**").authenticated()
+                .requestMatchers("/api/v1/emeralds/**").permitAll()
                 .anyRequest().permitAll()
             )
             .sessionManagement(session -> session
@@ -366,9 +369,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // 1 hora de cache para preflight
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -382,7 +386,7 @@ public class SecurityConfig {
 ### **OrderController**
 ```java
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 @CrossOrigin(origins = "http://localhost:3000")
 public class OrderController {
     
@@ -491,7 +495,7 @@ DESCRIBE orders;
 
 **Crear Orden:**
 ```bash
-curl -X POST http://localhost:8080/orders \
+curl -X POST http://localhost:8080/api/v1/orders \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {user_token}" \
   -d '{
@@ -518,12 +522,12 @@ curl -X POST http://localhost:8080/orders \
 
 **Obtener Órdenes (página 0):**
 ```bash
-curl -X GET "http://localhost:8080/orders?page=0&size=10&status=all" \
+curl -X GET "http://localhost:8080/api/v1/orders?page=0&size=10&status=all" \
   -H "Authorization: Bearer {user_token}"
 ```
 
 **Obtener Detalle:**
 ```bash
-curl -X GET http://localhost:8080/orders/ord_1234567890abcdef \
+curl -X GET http://localhost:8080/api/v1/orders/ord_1234567890abcdef \
   -H "Authorization: Bearer {user_token}"
 ``` 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { ProductType } from '@/types/product';
+import { config } from '@/lib/config';
 
 export interface OrderItem {
   product: ProductType;
@@ -39,6 +40,12 @@ interface OrderStore {
   loading: boolean;
   error: string | null;
   
+  // Pagination info
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+  
   // Actions
   createOrder: (items: OrderItem[], total: number, paymentMethod: string) => Promise<Order>;
   fetchOrders: (page?: number, limit?: number, status?: string) => Promise<void>;
@@ -49,7 +56,7 @@ interface OrderStore {
 }
 
 // API Base URL
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = config.api.baseUrl;
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -84,22 +91,22 @@ const api = {
   },
 
   async createOrder(orderData: any) {
-    return this.request('/orders', {
+    return this.request(config.api.endpoints.orders, {
       method: 'POST',
       body: JSON.stringify(orderData),
     });
   },
 
-  async fetchOrders(page = 1, limit = 10, status = 'all') {
-    return this.request(`/orders?page=${page}&limit=${limit}&status=${status}`);
+  async fetchOrders(page = 0, limit = 10, status = 'all') {
+    return this.request(`${config.api.endpoints.orders}?page=${page}&size=${limit}&status=${status}`);
   },
 
   async fetchOrderById(orderId: string) {
-    return this.request(`/orders/${orderId}`);
+    return this.request(`${config.api.endpoints.orders}/${orderId}`);
   },
 
   async updateOrderStatus(orderId: string, status: string, paymentId?: string) {
-    return this.request(`/orders/${orderId}/status`, {
+    return this.request(`${config.api.endpoints.orders}/${orderId}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status, paymentId }),
     });
@@ -111,6 +118,12 @@ export const useOrderStore = create<OrderStore>((set, get) => ({
   currentOrder: null,
   loading: false,
   error: null,
+  
+  // Pagination info
+  currentPage: 0,
+  totalPages: 0,
+  totalElements: 0,
+  pageSize: 10,
 
   createOrder: async (items: OrderItem[], total: number, paymentMethod: string) => {
     set({ loading: true, error: null });
@@ -189,7 +202,7 @@ export const useOrderStore = create<OrderStore>((set, get) => ({
     }
   },
 
-  fetchOrders: async (page = 1, limit = 10, status = 'all') => {
+  fetchOrders: async (page = 0, limit = 10, status = 'all') => {
     set({ loading: true, error: null });
     
     try {
@@ -239,6 +252,10 @@ export const useOrderStore = create<OrderStore>((set, get) => ({
         console.log('🔄 Transformed orders:', transformedOrders);
         set({ 
           orders: transformedOrders,
+          currentPage: response.pageable?.pageNumber || 0,
+          totalPages: response.totalPages || 0,
+          totalElements: response.totalElements || 0,
+          pageSize: response.pageable?.pageSize || 10,
           loading: false 
         });
       } else if (response.success) {

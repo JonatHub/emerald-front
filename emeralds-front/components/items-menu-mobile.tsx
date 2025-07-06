@@ -18,7 +18,7 @@ const ItemsMenuMobile = () => {
             <Link href="/" className="hover:underline">
               Inicio
             </Link>
-            <Link href="/esmeraldas/catalogo" className="hover:underline">
+            <Link href="/catalog" className="hover:underline">
               Catálogo de Esmeraldas
             </Link>
             <Link href="/esmeraldas/guia-de-compra" className="hover:underline">
