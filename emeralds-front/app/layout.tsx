@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import PayPalProvider from "@/components/paypal-provider";
 import StorageCleanup from "@/components/storage-cleanup";
+import OrderNotifications from "@/components/order-notifications";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <PayPalProvider>
           <StorageCleanup />
+          <OrderNotifications />
           <Navbar />
           {children}
           <Footer />

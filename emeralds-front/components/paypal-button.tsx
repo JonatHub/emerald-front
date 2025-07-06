@@ -32,21 +32,25 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
   // Crear orden en useEffect para evitar setState durante render
   useEffect(() => {
     if (!isOrderCreated && products.length > 0) {
-      try {
-        const orderItems: OrderItem[] = products.map(product => ({
-          product,
-          quantity: (product as any).quantity || 1,
-          totalPrice: product.price * ((product as any).quantity || 1),
-        }));
+      const createOrder = async () => {
+        try {
+          const orderItems: OrderItem[] = products.map(product => ({
+            product,
+            quantity: (product as any).quantity || 1,
+            totalPrice: product.price * ((product as any).quantity || 1),
+          }));
 
-        const newOrder = createOrderStore(orderItems, total);
-        setOrder(newOrder);
-        setIsOrderCreated(true);
-      } catch (error) {
-        console.error('Error creating order:', error);
-        toast.error('Error al crear la orden. Inténtalo de nuevo.');
-        onError?.(error);
-      }
+          const newOrder = await createOrderStore(orderItems, total, 'paypal');
+          setOrder(newOrder);
+          setIsOrderCreated(true);
+        } catch (error) {
+          console.error('Error creating order:', error);
+          toast.error('Error al crear la orden. Inténtalo de nuevo.');
+          onError?.(error);
+        }
+      };
+
+      createOrder();
     }
   }, [products, total, createOrderStore, isOrderCreated, onError]);
 
@@ -64,7 +68,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
             currency_code: "USD",
           },
           description: `Compra de ${products.length} esmeralda(s) - Alma Esmeralda`,
-          custom_id: order.id,
+          custom_id: order.orderId || order.id, // Usar el orderId del backend
         },
       ],
     });
@@ -79,20 +83,20 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
     try {
       const details = await actions.order.capture();
       
-      // Actualizar el estado de la orden
+      // Actualizar el estado de la orden en el backend
       try {
-        updateOrderStatus(order.id, 'completed', details.id);
+        await updateOrderStatus(order.orderId || order.id, 'completed', details.id);
       } catch (storageError) {
-        console.warn('Error updating order status in storage:', storageError);
+        console.warn('Error updating order status:', storageError);
       }
       
       toast.success("¡Pago completado exitosamente!");
       onSuccess?.(details);
     } catch (error) {
       try {
-        updateOrderStatus(order.id, 'failed');
+        await updateOrderStatus(order.orderId || order.id, 'failed');
       } catch (storageError) {
-        console.warn('Error updating order status in storage:', storageError);
+        console.warn('Error updating order status:', storageError);
       }
       toast.error("Error al procesar el pago");
       onError?.(error);
@@ -122,20 +126,20 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
       <PayPalButtons
         createOrder={createPayPalOrder}
         onApprove={onApprove}
-        onError={(err: any) => {
+        onError={async (err: any) => {
           try {
-            updateOrderStatus(order.id, 'failed');
+            await updateOrderStatus(order.orderId || order.id, 'failed');
           } catch (storageError) {
-            console.warn('Error updating order status in storage:', storageError);
+            console.warn('Error updating order status:', storageError);
           }
           toast.error("Error en el proceso de pago");
           onError?.(err);
         }}
-        onCancel={() => {
+        onCancel={async () => {
           try {
-            updateOrderStatus(order.id, 'cancelled');
+            await updateOrderStatus(order.orderId || order.id, 'cancelled');
           } catch (storageError) {
-            console.warn('Error updating order status in storage:', storageError);
+            console.warn('Error updating order status:', storageError);
           }
           toast.info("Pago cancelado");
           onCancel?.();

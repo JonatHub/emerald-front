@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { BaggageClaim, Heart, ShoppingCart, User, LogOut } from 'lucide-react';
+import { BaggageClaim, Heart, ShoppingCart, User, LogOut, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import MenuList from './menu-list';
 import ItemsMenuMobile from './items-menu-mobile';
@@ -45,6 +45,16 @@ const Navbar = () => {
                         </div>
                     )}
                     <Heart strokeWidth="1" className="cursor-pointer" onClick={() => router.push('/wishlist')} />
+                    
+                    {isLoggedIn && (
+                        <div 
+                            className="cursor-pointer" 
+                            onClick={() => router.push('/orders')}
+                            title="Mis Pedidos"
+                        >
+                            <Package strokeWidth="1" />
+                        </div>
+                    )}
                     
                     {isLoggedIn ? (
                         <div className="flex items-center gap-2">

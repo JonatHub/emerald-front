@@ -43,7 +43,7 @@ export default function Page() {
         if (orderId) {
             router.push(`/order-confirmation?orderId=${orderId}`);
         } else {
-            router.push('/');
+            router.push('/orders');
         }
     };
 

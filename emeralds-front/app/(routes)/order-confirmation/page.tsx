@@ -7,23 +7,24 @@ import { CheckCircle, Package, Clock, MapPin } from "lucide-react";
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { getOrder, clearCurrentOrder } = useOrderStore();
+  const { currentOrder, fetchOrderById, clearCurrentOrder } = useOrderStore();
   const [order, setOrder] = useState<any>(null);
 
   useEffect(() => {
     const orderId = searchParams.get("orderId");
     if (orderId) {
-      const foundOrder = getOrder(orderId);
-      if (foundOrder) {
-        setOrder(foundOrder);
-        clearCurrentOrder();
-      } else {
-        router.push("/");
-      }
+      fetchOrderById(orderId).then((foundOrder) => {
+        if (foundOrder) {
+          setOrder(foundOrder);
+          clearCurrentOrder();
+        } else {
+          router.push("/");
+        }
+      });
     } else {
       router.push("/");
     }
-  }, [searchParams, getOrder, clearCurrentOrder, router]);
+  }, [searchParams, fetchOrderById, clearCurrentOrder, router]);
 
   if (!order) {
     return (
