@@ -73,9 +73,9 @@ export default function OrdersPage() {
     // Filtrar por búsqueda
     if (searchTerm) {
       filtered = filtered.filter(order =>
-        getOrderId(order).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (getOrderId(order) || '').toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.items.some(item => 
-          item.product.name.toLowerCase().includes(searchTerm.toLowerCase())
+          (item.product?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }

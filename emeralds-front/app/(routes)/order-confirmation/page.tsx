@@ -2,34 +2,81 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrderStore } from "@/hooks/use-orders";
-import { CheckCircle, Package, Clock, MapPin } from "lucide-react";
+import { CheckCircle, Package, Clock, MapPin, AlertCircle } from "lucide-react";
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { currentOrder, fetchOrderById, clearCurrentOrder } = useOrderStore();
+  const { fetchOrderById, clearCurrentOrder } = useOrderStore();
   const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const orderId = searchParams.get("orderId");
     if (orderId) {
-      fetchOrderById(orderId).then((foundOrder) => {
-        if (foundOrder) {
-          setOrder(foundOrder);
-          clearCurrentOrder();
-        } else {
-          router.push("/");
-        }
-      });
+      setLoading(true);
+      setError(null);
+      
+      fetchOrderById(orderId)
+        .then((foundOrder) => {
+          if (foundOrder) {
+            setOrder(foundOrder);
+            clearCurrentOrder();
+          } else {
+            setError("Orden no encontrada");
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching order:", err);
+          setError("Error al cargar la orden");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
-      router.push("/");
+      setError("ID de orden no proporcionado");
+      setLoading(false);
     }
   }, [searchParams, fetchOrderById, clearCurrentOrder, router]);
 
-  if (!order) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando detalles de la orden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center max-w-md mx-auto px-4">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {error || "Orden no encontrada"}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            No pudimos cargar los detalles de tu orden. Verifica que el enlace sea correcto.
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push("/orders")}
+              className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+            >
+              Ver mis órdenes
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+            >
+              Volver al inicio
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -57,7 +104,7 @@ export default function OrderConfirmationPage() {
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Información de la Orden</h3>
-            <p className="text-sm text-gray-600">ID: {order.id}</p>
+            <p className="text-sm text-gray-600">ID: {order.orderId || order.id}</p>
             <p className="text-sm text-gray-600">
               Fecha: {new Date(order.createdAt).toLocaleDateString("es-ES")}
             </p>
@@ -82,7 +129,7 @@ export default function OrderConfirmationPage() {
             {order.items.map((item: any, index: number) => (
               <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <img
-                  src={item.product.imageUrls[0]}
+                  src={item.product.imageUrls?.[0] || item.product.imageUrl || '/placeholder-image.jpg'}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded border"
                 />

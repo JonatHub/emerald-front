@@ -147,10 +147,10 @@ export const useOrderStore = create<OrderStore>((set, get) => ({
         responseData = {
           orderId: response.id?.toString(),
           id: response.id?.toString(),
-          status: response.status?.toLowerCase(),
-          total: response.total,
-          currency: response.currency,
-          paymentMethod: response.paymentMethod,
+          status: response.status?.toLowerCase() || 'pending',
+          total: response.total || 0,
+          currency: response.currency || 'USD',
+          paymentMethod: response.paymentMethod || 'unknown',
           createdAt: response.createdAt || new Date().toISOString(),
           updatedAt: response.updatedAt || response.createdAt || new Date().toISOString(),
         };
@@ -205,39 +205,36 @@ export const useOrderStore = create<OrderStore>((set, get) => ({
         console.log('📦 Using Spring Boot format, orders:', response.content);
         
         // Transformar la respuesta para que coincida con la interfaz Order
-        const transformedOrders = (response.content || []).map((order: any) => ({
-          orderId: order.id?.toString(), // Convertir a string
-          id: order.id?.toString(), // Mantener compatibilidad
-          status: order.status?.toLowerCase(), // Convertir a minúsculas
-          total: order.total,
-          currency: order.currency,
-          paymentMethod: order.paymentMethod,
-          paymentId: order.paymentId,
-          createdAt: order.createdAt || new Date().toISOString(),
-          updatedAt: order.updatedAt || order.createdAt || new Date().toISOString(),
-          items: order.items?.map((item: any) => ({
-            product: {
-              id: item.product.id,
-              name: item.product.name,
-              price: item.product.price,
-              imageUrls: item.product.imageUrl ? [item.product.imageUrl] : [],
-              description: item.product.description || '',
-              origin: item.product.origin || '',
-              color: item.product.color || '',
-              clarity: item.product.clarity || '',
-              caratWeight: item.product.caratWeight || 0,
-            },
-            quantity: item.quantity,
-            totalPrice: item.totalPrice,
-          })) || [],
-          shippingAddress: {
-            street: order.street,
-            city: order.city,
-            state: order.state,
-            postalCode: order.postalCode,
-            country: order.country,
-          },
-        }));
+        const transformedOrders = (response.content || [])
+          .filter((order: any) => order && order.id) // Filtrar órdenes válidas
+          .map((order: any) => ({
+            orderId: order.id?.toString(), // Convertir a string
+            id: order.id?.toString(), // Mantener compatibilidad
+            status: order.status?.toLowerCase() || 'pending', // Convertir a minúsculas
+            total: order.total || 0,
+            currency: order.currency || 'USD',
+            paymentMethod: order.paymentMethod || 'unknown',
+            paymentId: order.paymentId,
+            createdAt: order.createdAt || new Date().toISOString(),
+            updatedAt: order.updatedAt || order.createdAt || new Date().toISOString(),
+            items: order.items?.map((item: any) => ({
+              product: {
+                id: item.productId,
+                name: item.productName,
+                price: item.unitPrice,
+                imageUrls: item.productImage ? [item.productImage] : [],
+                description: item.productDetails?.description || '',
+                origin: item.productDetails?.origin || '',
+                color: item.productDetails?.color || '',
+                clarity: item.productDetails?.clarity || '',
+                caratWeight: item.productDetails?.caratWeight || 0,
+              },
+              quantity: item.quantity,
+              totalPrice: item.totalPrice,
+            })) || [],
+            shippingAddress: order.shippingAddress,
+            paymentDetails: order.paymentDetails,
+          }));
         
         console.log('🔄 Transformed orders:', transformedOrders);
         set({ 
@@ -279,35 +276,30 @@ export const useOrderStore = create<OrderStore>((set, get) => ({
         order = {
           orderId: response.id?.toString(),
           id: response.id?.toString(),
-          status: response.status?.toLowerCase(),
-          total: response.total,
-          currency: response.currency,
-          paymentMethod: response.paymentMethod,
+          status: response.status?.toLowerCase() || 'pending',
+          total: response.total || 0,
+          currency: response.currency || 'USD',
+          paymentMethod: response.paymentMethod || 'unknown',
           paymentId: response.paymentId,
           createdAt: response.createdAt || new Date().toISOString(),
           updatedAt: response.updatedAt || response.createdAt || new Date().toISOString(),
           items: response.items?.map((item: any) => ({
             product: {
-              id: item.product.id,
-              name: item.product.name,
-              price: item.product.price,
-              imageUrls: item.product.imageUrl ? [item.product.imageUrl] : [],
-              description: item.product.description || '',
-              origin: item.product.origin || '',
-              color: item.product.color || '',
-              clarity: item.product.clarity || '',
-              caratWeight: item.product.caratWeight || 0,
+              id: item.productId,
+              name: item.productName,
+              price: item.unitPrice,
+              imageUrls: item.productImage ? [item.productImage] : [],
+              description: item.productDetails?.description || '',
+              origin: item.productDetails?.origin || '',
+              color: item.productDetails?.color || '',
+              clarity: item.productDetails?.clarity || '',
+              caratWeight: item.productDetails?.caratWeight || 0,
             },
             quantity: item.quantity,
             totalPrice: item.totalPrice,
           })) || [],
-          shippingAddress: {
-            street: response.street,
-            city: response.city,
-            state: response.state,
-            postalCode: response.postalCode,
-            country: response.country,
-          },
+          shippingAddress: response.shippingAddress,
+          paymentDetails: response.paymentDetails,
         };
       } else if (response.success && response.data) {
         // Formato personalizado
